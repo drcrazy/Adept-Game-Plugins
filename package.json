@@ -1,0 +1,10 @@
+{
+  "name": "adept-game-plugins",
+  "private": true,
+  "description": "Adept show plugin ecosystem — SDK and first-party plugins",
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  }
+}

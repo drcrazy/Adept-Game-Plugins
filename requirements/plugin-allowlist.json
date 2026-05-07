@@ -1,0 +1,7 @@
+{
+  "$comment": "Allowlist of trusted GitHub orgs/repos for @adept-plugins/* packages. The validator CLI (packages/validator-cli) rejects any git-sourced dependency whose resolved URL does not match an entry here. Only annotated tags or commit SHAs are accepted — no branch refs.",
+  "allowedOrgs": [
+    "adept-tv"
+  ],
+  "allowedRepos": []
+}
