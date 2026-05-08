@@ -1,7 +1,7 @@
 {
-  "name": "@adept-plugins/spectator-picks",
+  "name": "@adept-plugins/spectator-bet",
   "version": "1.0.0",
-  "description": "Spectator picks segment — lobby → spectator_picks → round:1",
+  "description": "Spectator bet segment — lobby → spectator_bet → round:1",
   "type": "module",
   "main": "./dist/server.js",
   "exports": {
@@ -23,12 +23,12 @@
     "typescript": "^5.7.2"
   },
   "adept": {
-    "pluginId": "spectator-picks",
+    "pluginId": "spectator-bet",
     "apiVersion": 1,
     "capabilities": {
       "segments": [
         {
-          "id": "spectator_picks",
+          "id": "spectator_bet",
           "slot": "after:lobby",
           "next": "round:1"
         }

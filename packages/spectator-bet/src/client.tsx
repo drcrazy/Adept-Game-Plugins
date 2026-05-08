@@ -1,25 +1,25 @@
 /**
- * @adept-plugins/spectator-picks — client entry point
+ * @adept-plugins/spectator-bet — client entry point
  *
- * Registers a React segment view for spectator_picks.
+ * Registers a React segment view for spectator_bet.
  * Spectators see a seat-picker; the host sees a lock button.
  */
 
 import type { PluginClientRegistry, SegmentViewProps, SessionSnapshot } from "@adept/plugin-sdk";
 
-const PLUGIN_ID = "spectator-picks";
-const SEGMENT_ID = "spectator_picks";
+const PLUGIN_ID = "spectator-bet";
+const SEGMENT_ID = "spectator_bet";
 
-type SpectatorPicksState = {
+type SpectatorBetState = {
   locked: boolean;
   bets: Record<string, 1 | 2 | 3 | 4 | 5>;
 };
 
-function getState(snapshot: SessionSnapshot): SpectatorPicksState {
-  return (snapshot.segmentState[SEGMENT_ID] ?? { locked: false, bets: {} }) as SpectatorPicksState;
+function getState(snapshot: SessionSnapshot): SpectatorBetState {
+  return (snapshot.segmentState[SEGMENT_ID] ?? { locked: false, bets: {} }) as SpectatorBetState;
 }
 
-function SpectatorPicksView({ snapshot, pluginId, segmentId, role, send }: SegmentViewProps & { role: string }) {
+function SpectatorBetView({ snapshot, pluginId, segmentId, role, send }: SegmentViewProps & { role: string }) {
   const state = getState(snapshot);
   const seatCount = 5 as const;
 
@@ -96,5 +96,5 @@ function SpectatorPicksView({ snapshot, pluginId, segmentId, role, send }: Segme
 }
 
 export function registerClient(registry: PluginClientRegistry): void {
-  registry.registerSegmentView(PLUGIN_ID, SEGMENT_ID, SpectatorPicksView);
+  registry.registerSegmentView(PLUGIN_ID, SEGMENT_ID, SpectatorBetView);
 }
