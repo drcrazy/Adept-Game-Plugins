@@ -28,7 +28,7 @@ function StoryVideoView(_props: SegmentViewProps) {
   );
 }
 
-function DonationsView({ snapshot, send, role }: SegmentViewProps & { role: string }) {
+function DonationsView({ snapshot, send, role, pluginId, segmentId }: SegmentViewProps & { role: string }) {
   const [donSeat, setDonSeat] = useState(0);
   const [donAmount, setDonAmount] = useState(0);
 
@@ -73,15 +73,9 @@ function DonationsView({ snapshot, send, role }: SegmentViewProps & { role: stri
           </label>
           <button
             type="button"
-            onClick={() => send("player_donation", { seatIndex: donSeat, amount: donAmount })}
-            style={{
-              padding: "8px 16px",
-              background: "#2a3142",
-              border: "1px solid #3a4152",
-              borderRadius: 4,
-              color: "#fff",
-              cursor: "pointer",
-            }}
+            onClick={() =>
+              send("plugin_event", { pluginId, segmentId, event: "set_donation", payload: { seatIndex: donSeat, amount: donAmount } }) }
+              style={{ padding: "8px 16px", background: "#2a3142", border: "1px solid #3a4152", borderRadius: 4, color: "#fff", cursor: "pointer" }}
           >
             Отправить донат
           </button>

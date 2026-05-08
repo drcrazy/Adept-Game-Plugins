@@ -4,7 +4,7 @@
   "description": "Adept show plugin ecosystem — SDK and first-party plugins",
   "workspaces": ["packages/*"],
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run build --workspace=@adept/plugin-sdk && npm run build --workspaces --if-present --exclude=@adept/plugin-sdk",
     "typecheck": "npm run typecheck --workspaces --if-present"
   }
 }

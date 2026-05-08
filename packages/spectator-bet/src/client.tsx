@@ -37,15 +37,8 @@ function SpectatorBetView({ snapshot, pluginId, segmentId, role, send }: Segment
                 <button
                   key={seat}
                   type="button"
-                  onClick={() => send("spectator_pick_bet", { seat })}
-                  style={{
-                    padding: "8px 16px",
-                    background: "#2a3142",
-                    border: "1px solid #3a4152",
-                    borderRadius: 4,
-                    color: "#fff",
-                    cursor: "pointer",
-                  }}
+                  onClick={() => send("plugin_event", { pluginId, segmentId, event: "place_bet", payload: { seat } })}
+                  style={{ padding: "8px 16px", background: "#2a3142",  border: "1px solid #3a4152", borderRadius: 4, color: "#fff", cursor: "pointer" }}
                 >
                   Игрок {seat}
                 </button>
@@ -56,22 +49,8 @@ function SpectatorBetView({ snapshot, pluginId, segmentId, role, send }: Segment
           {role === "host" && (
             <button
               type="button"
-              onClick={() =>
-                send("plugin_action", {
-                  pluginId,
-                  segmentId,
-                  action: "lock_bets",
-                  payload: null,
-                })
-              }
-              style={{
-                padding: "8px 24px",
-                background: "#8e44ad",
-                border: "none",
-                borderRadius: 4,
-                color: "#fff",
-                cursor: "pointer",
-              }}
+              onClick={() => send("plugin_event", { pluginId, segmentId, event: "lock_bets", payload: null })}
+              style={{ padding: "8px 24px", background: "#8e44ad", border: "none", borderRadius: 4, color: "#fff", cursor: "pointer" }}
             >
               Зафиксировать ставки и начать Раунд 1
             </button>

@@ -5,7 +5,7 @@
  * Adept-Game provides runtime implementations; plugins import only from here.
  *
  * Main anchor phases: lobby  →  round:1 → round:2 → round:3  →  final
- * Everything else (spectator_picks, story_video, donations, between_final, wheel,
+ * Everything else (spectator_bet, story_video, donations, between_final, wheel,
  * roulette …) is a transition plugin_segment or a card-kind handler.
  * `final` is terminal — there is no separate "game over" state.
  */
@@ -53,6 +53,16 @@ export type ChatLine = {
 
 export type Participant = {
   id: string;
+  displayName: string;
+  role: Role;
+};
+
+/**
+ * Identity of the socket actor triggering a plugin event.
+ * Note: seat identity (if any) is host-defined and not modeled here.
+ */
+export type Actor = {
+  participantId: string;
   displayName: string;
   role: Role;
 };
@@ -149,12 +159,20 @@ export type SegmentActionHandler = (
   ctx: Ctx,
 ) => MutatorResult;
 
+export type SegmentEventHandler = (
+  event: string,
+  payload: unknown,
+  actor: Actor,
+  ctx: Ctx,
+) => MutatorResult;
+
 export type SegmentDefinition = {
   pluginId: string;
   id: string;
   fromPhaseKey: string;
   toPhaseKey: string;
   onAction?: SegmentActionHandler;
+  onEvent?: SegmentEventHandler;
 };
 
 export type CardHandlerDef = {
@@ -201,6 +219,16 @@ export type PluginActionMessage = {
     pluginId: string;
     segmentId: string;
     action: string;
+    payload: unknown;
+  };
+};
+
+export type PluginEventMessage = {
+  type: "plugin_event";
+  payload: {
+    pluginId: string;
+    segmentId: string;
+    event: string;
     payload: unknown;
   };
 };
