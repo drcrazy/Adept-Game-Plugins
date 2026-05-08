@@ -1,0 +1,44 @@
+{
+  "name": "@adept-plugins/funeral",
+  "version": "1.0.0",
+  "description": "Funeral between-rounds transition (REQ-12) — round:2 → story_video → donations → round:3",
+  "type": "module",
+  "main": "./dist/server.js",
+  "exports": {
+    ".": "./dist/server.js",
+    "./client": "./dist/client.js"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "peerDependencies": {
+    "@adept/plugin-sdk": "^1.0.0",
+    "react": "^18.0.0"
+  },
+  "devDependencies": {
+    "@adept/plugin-sdk": "*",
+    "@types/react": "^18.3.0",
+    "typescript": "^5.7.2"
+  },
+  "adept": {
+    "pluginId": "funeral",
+    "apiVersion": 1,
+    "capabilities": {
+      "segments": [
+        {
+          "id": "story_video",
+          "slot": "after:round:2",
+          "next": "plugin_segment:funeral:donations"
+        },
+        {
+          "id": "donations",
+          "slot": "after:plugin_segment:funeral:story_video",
+          "next": "round:3"
+        }
+      ],
+      "cardKinds": []
+    }
+  }
+}

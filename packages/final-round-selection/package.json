@@ -1,0 +1,40 @@
+{
+  "name": "@adept-plugins/final-round-selection",
+  "version": "1.0.0",
+  "description": "Final round selection — round:3 → between_final → final",
+  "type": "module",
+  "main": "./dist/server.js",
+  "exports": {
+    ".": "./dist/server.js",
+    "./client": "./dist/client.js"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "peerDependencies": {
+    "@adept/plugin-sdk": "^1.0.0",
+    "react": "^18.0.0"
+  },
+  "devDependencies": {
+    "@adept/plugin-sdk": "*",
+    "@types/react": "^18.3.0",
+    "typescript": "^5.7.2"
+  },
+  "adept": {
+    "pluginId": "final-round-selection",
+    "apiVersion": 1,
+    "capabilities": {
+      "segments": [
+        {
+          "id": "between_final",
+          "slot": "after:round:3",
+          "next": "final"
+        }
+      ],
+      "cardKinds": []
+    }
+  }
+}
+
