@@ -49,6 +49,25 @@ function onEvent(event: string, payload: unknown, actor: Actor, ctx: Ctx): Mutat
     return { ok: true };
   }
 
+  if (event === "set_correct_count") {
+    if (actor.role !== "host") return { ok: false, error: "Host only" };
+    if (!payload || typeof payload !== "object") return { ok: false, error: "Invalid payload" };
+    const nick = String((payload as Record<string, unknown>)["spectatorKey"] ?? "")
+      .trim()
+      .slice(0, 64);
+    const raw = (payload as Record<string, unknown>)["count"];
+    const countNum = typeof raw === "number" ? raw : Number(raw);
+    if (!nick) return { ok: false, error: "spectatorKey required" };
+    if (!Number.isFinite(countNum)) return { ok: false, error: "count must be a number" };
+
+    const state = getState(ctx);
+    const n = Math.max(0, Math.min(9999, Math.floor(countNum)));
+    if (n === 0) delete state.spectatorCorrectCounts[nick];
+    else state.spectatorCorrectCounts[nick] = n;
+    ctx.setSegmentState(SEGMENT_ID, state);
+    return { ok: true };
+  }
+
   if (event === "next_emoji") {
     if (actor.role !== "host") return { ok: false, error: "Host only" };
     const state = getState(ctx);

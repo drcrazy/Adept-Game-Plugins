@@ -6,7 +6,12 @@
  */
 
 import { useMemo, useState } from 'react'
-import type { PluginClientRegistry, SegmentViewProps, SessionSnapshot } from '@adept/plugin-sdk'
+import type {
+  Participant,
+  PluginClientRegistry,
+  SegmentViewProps,
+  SessionSnapshot,
+} from '@adept/plugin-sdk'
 import type { OpeningShowState } from './state.js'
 
 const PLUGIN_ID = 'opening-show'
@@ -57,6 +62,19 @@ const LOBBY_EMOJI_REVEAL_LINES: readonly string[] = [
 
 const LOBBY_EMOJI_REVEAL_LINE_COUNT = LOBBY_EMOJI_REVEAL_LINES.length
 
+function participantRoleLabel(role: Participant['role']): string {
+  switch (role) {
+    case 'host':
+      return 'Ведущий'
+    case 'player':
+      return 'Игрок'
+    case 'spectator':
+      return 'Зритель'
+    default:
+      return String(role)
+  }
+}
+
 function getState(snapshot: SessionSnapshot): OpeningShowState {
   return (snapshot.segmentState[SEGMENT_ID] ?? {
     emojiLineIndex: -1,
@@ -76,34 +94,54 @@ export function OpeningShowHostAside({
   send(type: string, payload: unknown): void
 }) {
   const state = getState(snapshot)
-  const [spectatorKey, setSpectatorKey] = useState('')
+  const [draftCorrectByParticipantId, setDraftCorrectByParticipantId] = useState<
+    Record<string, string>
+  >({})
 
   const lineIdx = state.emojiLineIndex
   const emojiAllShown = lineIdx >= LOBBY_EMOJI_REVEAL_LINE_COUNT - 1
   const emojiAtStart = lineIdx < 0
 
-  const sorted = useMemo(() => {
-    return Object.entries(state.spectatorCorrectCounts)
-      .sort((a, b) => (b[1] ?? 0) - (a[1] ?? 0))
-      .slice(0, 20)
-  }, [state.spectatorCorrectCounts])
+  const onlineUsersSorted = useMemo(() => {
+    const counts = state.spectatorCorrectCounts
+    const onlineIds = new Set(snapshot.onlineParticipantIds ?? [])
+    return snapshot.participants
+      .filter(p => onlineIds.has(p.id))
+      .slice()
+      .sort((a, b) => {
+        const ca = counts[a.displayName] ?? 0
+        const cb = counts[b.displayName] ?? 0
+        if (cb !== ca) return cb - ca
+        return a.displayName.localeCompare(b.displayName)
+      })
+  }, [
+    snapshot.participants,
+    snapshot.onlineParticipantIds,
+    state.spectatorCorrectCounts,
+  ])
 
   return (
     <div
-      className="card"
       style={{
         height: '100%',
         minHeight: 0,
         display: 'flex',
         flexDirection: 'column',
-        gap: 12,
+        gap: 4,
         marginBottom: 0,
+        background: '#1c1f28',
+        border: '1px solid #2a3142',
+        borderRadius: '10px',
       }}>
       <div
         style={{
           flexShrink: 0,
           padding: '0.625rem 1rem',
           borderBottom: '1px solid rgba(42, 49, 66, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 12,
         }}>
         <button
           type="button"
@@ -123,7 +161,7 @@ export function OpeningShowHostAside({
             />
           </svg>
         </button>
-        <span className="chat-panel__title">
+        <span>
           Emoji: {lineIdx + 1} / {LOBBY_EMOJI_REVEAL_LINE_COUNT}
         </span>
 
@@ -147,91 +185,165 @@ export function OpeningShowHostAside({
         </button>
       </div>
 
-      <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-        <input
-          value={spectatorKey}
-          onChange={e => setSpectatorKey(e.target.value)}
-          placeholder="spectatorKey (как в чате)"
-          style={{
-            flex: 1,
-            padding: '10px 12px',
-            background: '#0f1320',
-            border: '1px solid #2a3142',
-            borderRadius: 10,
-            color: '#fff',
-            minWidth: 0,
-          }}
-        />
-        <button
-          type="button"
-          onClick={() => {
-            const key = spectatorKey.trim()
-            if (!key) return
-            send('plugin_event', {
-              pluginId,
-              segmentId,
-              event: 'mark_correct',
-              payload: { spectatorKey: key },
-            })
-            setSpectatorKey('')
-          }}
-          style={{
-            padding: '10px 18px',
-            background: '#27ae60',
-            border: 'none',
-            borderRadius: 10,
-            color: '#fff',
-            cursor: 'pointer',
-            whiteSpace: 'nowrap',
-          }}>
-          Засчитать
-        </button>
-      </div>
-
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'baseline',
-          justifyContent: 'space-between',
-          gap: 12,
-        }}>
-        <div style={{ color: '#f1c40f', fontWeight: 700 }}>Таблица правильных ответов</div>
-        <div style={{ color: '#9aa3b2', fontSize: 12 }}>
-          {Object.keys(state.spectatorCorrectCounts).length} зр.
-        </div>
-      </div>
-
       <div
         style={{
           flex: 1,
           minHeight: 0,
-          overflow: 'auto',
-          borderTop: '1px solid rgba(42,49,66,0.8)',
-          paddingTop: 10,
           display: 'flex',
           flexDirection: 'column',
-          gap: 8,
         }}>
-        {sorted.length === 0 ? (
-          <div style={{ color: '#888' }}>Пока пусто.</div>
-        ) : (
-          sorted.map(([k, v]) => (
-            <div
-              key={k}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                gap: 12,
-                alignItems: 'center',
-              }}>
-              <span style={{ color: '#ddd', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {k}
-              </span>
-              <span style={{ color: '#f1c40f', fontVariantNumeric: 'tabular-nums' }}>{v}</span>
-            </div>
-          ))
-        )}
+
+        <div
+          style={{
+            flex: 1,
+            minHeight: 0,
+            overflow: 'auto',
+            border: '1px solid rgba(42, 49, 66, 0.9)',
+            background: '#0f1320',
+          }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid rgba(42, 49, 66, 0.95)' }}>
+                <th
+                  style={{
+                    textAlign: 'left',
+                    padding: '8px 8px',
+                    color: '#9aa3b2',
+                    fontWeight: 600,
+                    position: 'sticky',
+                    top: 0,
+                    background: '#0f1320',
+                  }}>
+                  Имя
+                </th>
+                <th
+                  style={{
+                    textAlign: 'left',
+                    padding: '8px 8px',
+                    color: '#9aa3b2',
+                    fontWeight: 600,
+                    position: 'sticky',
+                    top: 0,
+                    background: '#0f1320',
+                  }}>
+                  Роль
+                </th>
+                <th
+                  style={{
+                    textAlign: 'right',
+                    padding: '8px 8px',
+                    color: '#9aa3b2',
+                    fontWeight: 600,
+                    position: 'sticky',
+                    top: 0,
+                    background: '#0f1320',
+                  }}>
+                  Позиция
+                </th>
+                <th
+                  style={{
+                    textAlign: 'right',
+                    padding: '8px 10px 8px 6px',
+                    color: '#9aa3b2',
+                    fontWeight: 600,
+                    whiteSpace: 'nowrap',
+                    position: 'sticky',
+                    top: 0,
+                    background: '#0f1320',
+                  }}>
+                  
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {onlineUsersSorted.length === 0 ? (
+                <tr>
+                  <td colSpan={4} style={{ padding: '14px 10px', color: '#9aa3b2' }}>
+                    No users online.
+                  </td>
+                </tr>
+              ) : (
+                onlineUsersSorted.map(p => {
+                  const serverCount = state.spectatorCorrectCounts[p.displayName] ?? 0
+                  const draft = draftCorrectByParticipantId[p.id]
+                  const inputValue = draft !== undefined ? draft : String(serverCount)
+
+                  return (
+                    <tr key={p.id} style={{ borderBottom: '1px solid rgba(42, 49, 66, 0.55)' }}>
+                      <td style={{ padding: '8px 10px', color: '#e8eef6', verticalAlign: 'middle' }}>
+                        {p.displayName}
+                      </td>
+                      <td style={{ padding: '8px 8px', color: '#9aa3b2', verticalAlign: 'middle' }}>
+                        {participantRoleLabel(p.role)}
+                      </td>
+                      <td style={{ padding: '6px 8px', verticalAlign: 'middle', textAlign: 'right' }}>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={inputValue}
+                          onChange={e =>
+                            setDraftCorrectByParticipantId(s => ({ ...s, [p.id]: e.target.value }))
+                          }
+                          onBlur={() => {
+                            const raw = draftCorrectByParticipantId[p.id]
+                            if (raw === undefined) return
+                            let n = Number.parseInt(raw.trim(), 10)
+                            if (!Number.isFinite(n) || n < 0) n = serverCount
+                            n = Math.min(9999, Math.floor(n))
+                            send('plugin_event', {
+                              pluginId,
+                              segmentId,
+                              event: 'set_correct_count',
+                              payload: { spectatorKey: p.displayName, count: n },
+                            })
+                            setDraftCorrectByParticipantId(s => {
+                              const next = { ...s }
+                              delete next[p.id]
+                              return next
+                            })
+                          }}
+                          style={{
+                            width: 52,
+                            maxWidth: '100%',
+                            padding: '6px 8px',
+                            textAlign: 'right',
+                            boxSizing: 'border-box',
+                            background: '#1a2130',
+                            border: '1px solid #2a3142',
+                            borderRadius: 8,
+                            color: '#fff',
+                          }}
+                        />
+                      </td>
+                      <td style={{ padding: '6px 10px', verticalAlign: 'middle', textAlign: 'right' }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            send('plugin_event', {
+                              pluginId,
+                              segmentId,
+                              event: 'mark_correct',
+                              payload: { spectatorKey: p.displayName },
+                            })
+                            setDraftCorrectByParticipantId(s => {
+                              const next = { ...s }
+                              delete next[p.id]
+                              return next
+                            })
+                          }}
+                          className="game-header__phase-nav-btn">
+                          +1
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
+
     </div>
   )
 }
