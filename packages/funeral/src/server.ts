@@ -11,14 +11,11 @@
  */
 
 import type { Actor, Ctx, MutatorResult, PluginServerRegistry } from "@adept/plugin-sdk";
+import type { DonationsState } from "./state.js";
 
 const PLUGIN_ID = "funeral";
 const STORY_VIDEO_SEGMENT_ID = "story_video";
 const DONATIONS_SEGMENT_ID = "donations";
-
-type DonationsState = {
-  bySeat: [number | null, number | null, number | null, number | null, number | null];
-};
 
 function getDonationsState(ctx: Ctx): DonationsState {
   return (ctx.snapshot.segmentState[DONATIONS_SEGMENT_ID] ?? {

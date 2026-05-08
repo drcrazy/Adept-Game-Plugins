@@ -6,14 +6,10 @@
  */
 
 import type { PluginClientRegistry, SegmentViewProps, SessionSnapshot } from "@adept/plugin-sdk";
+import type { SpectatorBetState } from "./state.js";
 
 const PLUGIN_ID = "spectator-bet";
 const SEGMENT_ID = "spectator_bet";
-
-type SpectatorBetState = {
-  locked: boolean;
-  bets: Record<string, 1 | 2 | 3 | 4 | 5>;
-};
 
 function getState(snapshot: SessionSnapshot): SpectatorBetState {
   return (snapshot.segmentState[SEGMENT_ID] ?? { locked: false, bets: {} }) as SpectatorBetState;
@@ -22,6 +18,7 @@ function getState(snapshot: SessionSnapshot): SpectatorBetState {
 function SpectatorBetView({ snapshot, pluginId, segmentId, role, send }: SegmentViewProps & { role: string }) {
   const state = getState(snapshot);
   const seatCount = 5 as const;
+  const betEntries = Object.entries(state.bets) as Array<[string, 1 | 2 | 3 | 4 | 5]>;
 
   return (
     <div style={{ padding: "16px", background: "#1a1f2e", borderRadius: 8, border: "1px solid #2a3142" }}>
@@ -64,7 +61,7 @@ function SpectatorBetView({ snapshot, pluginId, segmentId, role, send }: Segment
 
       <details style={{ marginTop: 12, fontSize: "0.8rem", color: "#888" }}>
         <summary>Все ставки</summary>
-        {Object.entries(state.bets).map(([key, seat]) => (
+        {betEntries.map(([key, seat]) => (
           <div key={key}>
             {key}: Игрок {seat}
           </div>

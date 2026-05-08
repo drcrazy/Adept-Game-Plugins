@@ -5,14 +5,10 @@
  */
 
 import type { PluginServerRegistry, MutatorResult, Ctx, Actor } from "@adept/plugin-sdk";
+import type { SpectatorBetState } from "./state.js";
 
 const PLUGIN_ID = "spectator-bet";
 const SEGMENT_ID = "spectator_bet";
-
-type SpectatorBetState = {
-  locked: boolean;
-  bets: Record<string, 1 | 2 | 3 | 4 | 5>;
-};
 
 function getState(ctx: Ctx): SpectatorBetState {
   return (ctx.snapshot.segmentState[SEGMENT_ID] ?? { locked: false, bets: {} }) as SpectatorBetState;

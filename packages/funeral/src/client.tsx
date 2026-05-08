@@ -8,16 +8,13 @@
 
 import { useState } from "react";
 import type { PluginClientRegistry, SegmentViewProps } from "@adept/plugin-sdk";
+import type { DonationsState } from "./state.js";
 
 const PLUGIN_ID = "funeral";
 const STORY_VIDEO_SEGMENT_ID = "story_video";
 const DONATIONS_SEGMENT_ID = "donations";
 
 const DONATIONS_STATE_KEY = "donations";
-
-type DonationsState = {
-  bySeat: [number | null, number | null, number | null, number | null, number | null];
-};
 
 function StoryVideoView(_props: SegmentViewProps) {
   return (
@@ -41,7 +38,7 @@ function DonationsView({ snapshot, send, role, pluginId, segmentId }: SegmentVie
       <h3 style={{ marginTop: 0 }}>Донаты (REQ-12)</h3>
 
       <div style={{ marginBottom: 12, fontSize: "0.85rem", color: "#aaa" }}>
-        {state.bySeat.map((v, i) => (
+        {state.bySeat.map((v: number | null, i: number) => (
           <span key={i} style={{ marginRight: 12 }}>
             Игрок {i + 1}: {v ?? "—"}
           </span>
