@@ -185,6 +185,16 @@ export function OpeningShowHostAside({
         </button>
       </div>
 
+      <div style={{ flexShrink: 0, padding: '0.625rem 1rem', borderBottom: '1px solid rgba(42, 49, 66, 0.55)' }}>
+        <button
+          type="button"
+          onClick={() => send('plugin_event', { pluginId, segmentId, event: 'top5_start_bets', payload: null })}
+          className="game-header__phase-nav-btn"
+          style={{ width: '100%' }}>
+          Дальше 
+        </button>
+      </div>
+
       <div
         style={{
           flex: 1,
@@ -358,41 +368,59 @@ function OpeningShowView({ snapshot }: SegmentViewProps) {
 
   return (
     <div
-      style={{ padding: 16, background: '#1a1f2e', borderRadius: 10, border: '1px solid #2a3142' }}>
+      style={{
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 16,
+        overflow: 'hidden',
+        boxSizing: 'border-box',
+      }}>
       <div
         style={{
-          borderRadius: 18,
-          border: '1px solid rgba(234, 179, 8, 0.45)',
-          boxShadow:
-            '0 0 20px rgba(234,179,8,0.22), 0 0 48px rgba(250,204,21,0.12), inset 0 0 24px rgba(234,179,8,0.06)',
-          padding: 18,
-          minHeight: 260,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          textAlign: 'center',
+          width: '100%',
+          maxWidth: 980,
+          padding: 16,
           background: 'transparent',
-          fontFamily:
-            'Arial, "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", system-ui, sans-serif',
+          borderRadius: 10,
+          boxSizing: 'border-box',
         }}>
-        {emojiLobbyText ? (
-          <div
-            style={{
-              width: '100%',
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word',
-              lineHeight: 1.2,
-              letterSpacing: '0.02em',
-              fontSize: 'clamp(2rem, min(9vmin, 10vw), 5.25rem)',
-              wordSpacing: '0.12em',
-            }}>
-            {emojiLobbyText}
-          </div>
-        ) : (
-          <div style={{ maxWidth: 520, color: '#9aa3b2', lineHeight: 1.5 }}>
-            Здесь появятся эмодзи, твоя задача разгадать какой босс зашифрован, ответ пиши в чат.
-          </div>
-        )}
+        <div
+          style={{
+            borderRadius: 18,
+            border: '1px solid rgba(234, 179, 8, 0.45)',
+            boxShadow:
+              '0 0 20px rgba(234,179,8,0.22), 0 0 48px rgba(250,204,21,0.12), inset 0 0 24px rgba(234,179,8,0.06)',
+            padding: 18,
+            minHeight: 260,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            background: 'transparent',
+            fontFamily:
+              'Arial, "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", system-ui, sans-serif',
+          }}>
+          {emojiLobbyText ? (
+            <div
+              style={{
+                width: '100%',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                lineHeight: 1.2,
+                letterSpacing: '0.02em',
+                fontSize: 'clamp(2rem, min(9vmin, 10vw), 5.25rem)',
+                wordSpacing: '0.12em',
+              }}>
+              {emojiLobbyText}
+            </div>
+          ) : (
+            <div style={{ maxWidth: 520, color: '#9aa3b2', lineHeight: 1.5 }}>
+              Здесь появятся эмодзи, твоя задача разгадать, какой босс зашифрован, ответ пиши в чат.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -400,4 +428,5 @@ function OpeningShowView({ snapshot }: SegmentViewProps) {
 
 export function registerClient(registry: PluginClientRegistry): void {
   registry.registerSegmentView(PLUGIN_ID, SEGMENT_ID, OpeningShowView)
+  registry.registerSegmentRailView(PLUGIN_ID, SEGMENT_ID, OpeningShowHostAside)
 }

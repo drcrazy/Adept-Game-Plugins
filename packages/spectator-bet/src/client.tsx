@@ -71,6 +71,19 @@ function SpectatorBetView({ snapshot, pluginId, segmentId, role, send }: Segment
   );
 }
 
+function SpectatorBetRailView({ snapshot }: SegmentViewProps) {
+  const state = getState(snapshot);
+  const betCount = Object.keys(state.bets).length;
+  return (
+    <div className="card">
+      <h4 style={{ marginTop: 0 }}>Ставки зрителей</h4>
+      <div style={{ color: "#aaa" }}>Ставок: {betCount}</div>
+      <div style={{ color: state.locked ? "#f1c40f" : "#888" }}>{state.locked ? "Ставки закрыты" : "Ставки открыты"}</div>
+    </div>
+  );
+}
+
 export function registerClient(registry: PluginClientRegistry): void {
   registry.registerSegmentView(PLUGIN_ID, SEGMENT_ID, SpectatorBetView);
+  registry.registerSegmentRailView(PLUGIN_ID, SEGMENT_ID, SpectatorBetRailView);
 }

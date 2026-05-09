@@ -4,7 +4,7 @@
  * Registers the opening_show segment: lobby → opening_show → spectator_bet
  */
 
-import type { PluginServerRegistry, MutatorResult, Ctx, Actor } from "@adept/plugin-sdk";
+import type { PluginServerRegistry, MutatorResult, Ctx, Actor, Participant } from "@adept/plugin-sdk";
 import type { OpeningShowState } from "./state.js";
 
 const PLUGIN_ID = "opening-show";
@@ -12,6 +12,7 @@ const SEGMENT_ID = "opening_show";
 const NEXT_PHASE = { kind: "plugin_segment", pluginId: "spectator-bet", id: "spectator_bet" } as const;
 /** Must match Node-Script emoji line count (40). */
 const EMOJI_REVEAL_MAX = 40;
+const TOP_PLAYERS_COUNT = 5;
 
 function getState(ctx: Ctx): OpeningShowState {
   return (ctx.snapshot.segmentState[SEGMENT_ID] ?? {
@@ -29,6 +30,33 @@ function assertActive(ctx: Ctx): MutatorResult | null {
     return { ok: false, error: "Opening show is not active" };
   }
   return null;
+}
+
+function applyTopSpectatorsAsPlayers(ctx: Ctx, n: number): string[] {
+  const state = getState(ctx);
+  const counts = state.spectatorCorrectCounts ?? {};
+
+  const spectators = ctx.snapshot.participants.filter((p) => p.role === "spectator");
+  const top = spectators
+    .slice()
+    .sort((a, b) => {
+      const ca = counts[a.displayName] ?? 0;
+      const cb = counts[b.displayName] ?? 0;
+      if (cb !== ca) return cb - ca;
+      return a.displayName.localeCompare(b.displayName);
+    })
+    .slice(0, Math.max(0, Math.floor(n)));
+
+  const topIds = new Set(top.map((p) => p.id));
+
+  // `ctx.snapshot` is a mutable draft during mutation (host runtime), even though
+  // the SDK marks the property itself as readonly.
+  (ctx.snapshot.participants as Participant[]).forEach((p) => {
+    if (p.role === "host") return;
+    p.role = topIds.has(p.id) ? "player" : "spectator";
+  });
+
+  return top.map((p) => p.displayName);
 }
 
 function onEvent(event: string, payload: unknown, actor: Actor, ctx: Ctx): MutatorResult {
@@ -86,6 +114,13 @@ function onEvent(event: string, payload: unknown, actor: Actor, ctx: Ctx): Mutat
 
   if (event === "start_bets") {
     if (actor.role !== "host") return { ok: false, error: "Host only" };
+    return ctx.requestTransition(NEXT_PHASE);
+  }
+
+  if (event === "top5_start_bets") {
+    if (actor.role !== "host") return { ok: false, error: "Host only" };
+    const picked = applyTopSpectatorsAsPlayers(ctx, TOP_PLAYERS_COUNT);
+    if (picked.length === 0) return { ok: false, error: "No spectators to promote" };
     return ctx.requestTransition(NEXT_PHASE);
   }
 

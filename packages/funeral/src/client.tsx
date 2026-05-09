@@ -25,6 +25,15 @@ function StoryVideoView(_props: SegmentViewProps) {
   );
 }
 
+function StoryVideoRailView(_props: SegmentViewProps) {
+  return (
+    <div className="card">
+      <h4 style={{ marginTop: 0 }}>Сюжет</h4>
+      <p style={{ color: "#aaa", marginBottom: 0 }}>Переходный сегмент.</p>
+    </div>
+  );
+}
+
 function DonationsView({ snapshot, send, role, pluginId, segmentId }: SegmentViewProps & { role: string }) {
   const [donSeat, setDonSeat] = useState(0);
   const [donAmount, setDonAmount] = useState(0);
@@ -84,7 +93,22 @@ function DonationsView({ snapshot, send, role, pluginId, segmentId }: SegmentVie
   );
 }
 
+function DonationsRailView({ snapshot }: SegmentViewProps) {
+  const state = (snapshot.segmentState[DONATIONS_STATE_KEY] ?? {
+    bySeat: [null, null, null, null, null],
+  }) as DonationsState;
+  const doneCount = state.bySeat.filter((v) => v != null).length;
+  return (
+    <div className="card">
+      <h4 style={{ marginTop: 0 }}>Донаты</h4>
+      <div style={{ color: "#aaa" }}>Ответов: {doneCount} / 5</div>
+    </div>
+  );
+}
+
 export function registerClient(registry: PluginClientRegistry): void {
   registry.registerSegmentView(PLUGIN_ID, STORY_VIDEO_SEGMENT_ID, StoryVideoView);
   registry.registerSegmentView(PLUGIN_ID, DONATIONS_SEGMENT_ID, DonationsView);
+  registry.registerSegmentRailView(PLUGIN_ID, STORY_VIDEO_SEGMENT_ID, StoryVideoRailView);
+  registry.registerSegmentRailView(PLUGIN_ID, DONATIONS_SEGMENT_ID, DonationsRailView);
 }

@@ -18,7 +18,17 @@ function BetweenFinalView(_props: SegmentViewProps) {
   );
 }
 
+function BetweenFinalRailView(_props: SegmentViewProps) {
+  return (
+    <div className="card">
+      <h4 style={{ marginTop: 0 }}>Финал</h4>
+      <p style={{ color: "#aaa", marginBottom: 0 }}>Сегмент подготовки к финалу.</p>
+    </div>
+  );
+}
+
 export function registerClient(registry: PluginClientRegistry): void {
   registry.registerSegmentView(PLUGIN_ID, SEGMENT_ID, BetweenFinalView);
+  registry.registerSegmentRailView(PLUGIN_ID, SEGMENT_ID, BetweenFinalRailView);
 }
 

@@ -207,6 +207,10 @@ export type CardExtensionProps = {
 
 export interface PluginClientRegistry {
   registerSegmentView(pluginId: string, segmentId: string, component: unknown): void;
+  /** Optional segment slot rendered in the host right rail column. */
+  registerSegmentRailView(pluginId: string, segmentId: string, component: unknown): void;
+  /** Optional segment slot that replaces the entire host page UI. */
+  registerSegmentFullScreenView(pluginId: string, segmentId: string, component: unknown): void;
   registerCardExtension(cardKind: string, component: unknown): void;
 }
 
