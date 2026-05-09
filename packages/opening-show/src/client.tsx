@@ -9,6 +9,7 @@ import { useMemo, useState } from 'react'
 import type {
   Participant,
   PluginClientRegistry,
+  Role,
   SegmentViewProps,
   SessionSnapshot,
 } from '@adept/plugin-sdk'
@@ -86,13 +87,17 @@ export function OpeningShowHostAside({
   snapshot,
   pluginId,
   segmentId,
+  role,
   send,
 }: {
   snapshot: SessionSnapshot
   pluginId: string
   segmentId: string
+  role: Role
   send(type: string, payload: unknown): void
 }) {
+  if (role !== 'host') return null
+
   const state = getState(snapshot)
   const [draftCorrectByParticipantId, setDraftCorrectByParticipantId] = useState<
     Record<string, string>
