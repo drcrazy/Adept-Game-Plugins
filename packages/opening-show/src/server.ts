@@ -56,7 +56,20 @@ function applyTopSpectatorsAsPlayers(ctx: Ctx, n: number): string[] {
     p.role = topIds.has(p.id) ? "player" : "spectator";
   });
 
-  return top.map((p) => p.displayName);
+  const names = top.map((p) => p.displayName);
+  const snap = ctx.snapshot as typeof ctx.snapshot & {
+    seatNames?: [string, string, string, string, string];
+  };
+  if (!Array.isArray(snap.seatNames) || snap.seatNames.length !== 5) {
+    snap.seatNames = ["P1", "P2", "P3", "P4", "P5"];
+  }
+  for (let i = 0; i < 5; i++) {
+    const raw = names[i];
+    snap.seatNames[i] =
+      (raw && raw.trim() ? raw.trim().slice(0, 32) : "") || `P${i + 1}`;
+  }
+
+  return names;
 }
 
 function onEvent(event: string, payload: unknown, actor: Actor, ctx: Ctx): MutatorResult {
