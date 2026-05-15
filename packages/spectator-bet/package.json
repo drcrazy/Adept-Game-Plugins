@@ -1,7 +1,7 @@
 {
   "name": "@adept-plugins/spectator-bet",
   "version": "1.0.0",
-  "description": "Spectator bet segment — lobby → spectator_bet → round:1",
+  "description": "Spectator bet segment — opening_show → spectator_bet → round:1",
   "type": "module",
   "main": "./dist/server.js",
   "exports": {

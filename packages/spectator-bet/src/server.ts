@@ -16,7 +16,9 @@ function getState(ctx: Ctx): SpectatorBetState {
 
 function onEvent(event: string, payload: unknown, actor: Actor, ctx: Ctx): MutatorResult {
   if (event === "place_bet") {
-    if (actor.role !== "spectator") return { ok: false, error: "Spectators only" };
+    if (actor.role !== "spectator" && actor.role !== "player") {
+      return { ok: false, error: "Players and spectators only" };
+    }
     if (!payload || typeof payload !== "object") return { ok: false, error: "Invalid payload" };
     
     const seat = (payload as Record<string, unknown>)["seat"];
@@ -32,7 +34,7 @@ function onEvent(event: string, payload: unknown, actor: Actor, ctx: Ctx): Mutat
     }
 
     const state = getState(ctx);
-    if (state.locked) return { ok: false, error: "Spectator bets are locked" };
+    if (state.locked) return { ok: false, error: "Bets are locked" };
     state.bets[actor.participantId] = seat;
     ctx.setSegmentState(SEGMENT_ID, state);
     return { ok: true };
