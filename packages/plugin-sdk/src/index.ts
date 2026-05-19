@@ -324,6 +324,8 @@ export type CardModalProps = CardActionProps & {
   themeName: string;
   pointValue: number;
   cell: QuestionCell;
+  /** Session WebSocket intents (`lottery_*`, etc.), not scoped to `plugin_card_event`. */
+  wsSend(type: string, payload: unknown): void;
 };
 
 export type CardFullScreenProps = CardModalProps;
